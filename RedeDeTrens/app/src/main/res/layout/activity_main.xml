@@ -25,7 +25,7 @@
             android:id="@+id/spnDe"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="25dp"
+            android:layout_marginLeft="27dp"
             android:minWidth="340dp"
             android:minHeight="30dp" />
     </LinearLayout>
