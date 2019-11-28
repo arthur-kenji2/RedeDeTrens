@@ -17,20 +17,31 @@ import java.util.*;
 
 public class MainActivity extends AppCompatActivity {
 
+    private Button btnBuscar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         try {
+            btnBuscar = findViewById(R.id.btnBuscar);
+            btnBuscar.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    pesquisar();
+                }
+            });
+
             TextView tvResultado = findViewById(R.id.txtViewResultados);
             setContentView(R.layout.activity_main);
             AssetManager ass = getAssets();
             Scanner sc = new Scanner(ass.open("GrafoTrem"));
             String s = "";
             ArrayList<String> lista = new ArrayList<String>();
-            for (int i = 0; sc.hasNext(); i++)
+            for (int i = 0; sc.hasNextLine(); i++)
             {
-                s = sc.next();
+                s = sc.nextLine();
+                s = s.substring(0,15);
                 if(!isNumber(s))
                 {
                     if(!jaTem(s, lista))
@@ -79,6 +90,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
+    public void pesquisar()
+    {
+
+    }
+
 
     public boolean isNumber(String n)
     {
