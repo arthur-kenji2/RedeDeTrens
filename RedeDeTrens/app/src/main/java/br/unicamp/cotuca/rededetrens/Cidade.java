@@ -3,13 +3,13 @@ package br.unicamp.cotuca.rededetrens;
 public class Cidade {
     private int id;
     private String nome;
-    private float x;
-    private float y;
+    private double x;
+    private double y;
 
     public Cidade(){
     }
 
-    public Cidade(int id, String nome, float x, float y) {
+    public Cidade(int id, String nome, double x, double y) {
         this.id = id;
         this.nome = nome;
         this.x = x;
@@ -32,19 +32,19 @@ public class Cidade {
         this.nome = nome;
     }
 
-    public float getX() {
+    public double getX() {
         return x;
     }
 
-    public void setX(float x) {
+    public void setX(double x) {
         this.x = x;
     }
 
-    public float getY() {
+    public double getY() {
         return y;
     }
 
-    public void setY(float y) {
+    public void setY(double y) {
         this.y = y;
     }
 }

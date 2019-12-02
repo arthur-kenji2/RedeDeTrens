@@ -1,6 +1,7 @@
 package br.unicamp.cotuca.rededetrens;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -11,6 +12,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.icu.text.ScientificNumberFormatter;
+import android.icu.text.UnicodeSetSpanner;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.*;
@@ -18,6 +21,10 @@ import android.widget.*;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.google.android.material.textfield.TextInputLayout;
+
+import org.w3c.dom.Text;
 
 import java.io.*;
 import java.text.NumberFormat;
@@ -30,6 +37,10 @@ public class MainActivity extends AppCompatActivity {
     private ImageView ivImagem;
     private TextView tvResultado;
     private ArrayList<Cidade> cidades;
+    private ArrayList<Caminho> caminhos;
+    private Bitmap mBitmap;
+    private Canvas canvas;
+    private Paint caneta;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -39,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             lista = new ArrayList<String>();
+            cidades = new ArrayList<>();
             tvResultado = findViewById(R.id.txtViewResultados);
             btnAdicionarCaminho = findViewById(R.id.btnCaminho);
             btnAdicionarCidade = findViewById(R.id.btnCidade);
@@ -46,12 +58,12 @@ public class MainActivity extends AppCompatActivity {
             ivImagem = findViewById(R.id.imgView);
 
             AssetManager ass = getAssets();
+
             Scanner sc = new Scanner(ass.open("GrafoTrem"));
-            lerArquivo(sc);
+            lerGrafo(sc);
             sc.close();
 
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, lista);
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item, lista);
 
             Spinner spnD = (Spinner) findViewById(R.id.spnDe);
             Spinner spnP = (Spinner) findViewById(R.id.spnPara);
@@ -63,15 +75,14 @@ public class MainActivity extends AppCompatActivity {
             lerCidades(sc);
             sc.close();
 
-            //fazerTabela();
-
             BitmapDrawable drawable = (BitmapDrawable) ivImagem.getDrawable();
-            Bitmap mBitmap = drawable.getBitmap();
+            mBitmap = drawable.getBitmap();
+            mBitmap = Bitmap.createScaledBitmap(mBitmap , 70, 70, true);
+            //ivImagem.setImageBitmap(mBitmap);
 
-            desenharCidades(mBitmap);
-
-            //OutputStream outputStream = new FileOutputStream(new File(String.valueOf(ass.open("Cidades"))), true);
-            //OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+            canvas = new Canvas(mBitmap);
+            caneta = new Paint();
+            caneta.setColor(Color.BLACK);
 
             spnD.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
             {
@@ -111,14 +122,120 @@ public class MainActivity extends AppCompatActivity {
             btnAdicionarCidade.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    startActivityForResult(new Intent(MainActivity.this, AdicionarCidade.class), 1);
+                    AlertDialog.Builder mBuilder = new AlertDialog.Builder(MainActivity.this);
+                    View mView = getLayoutInflater().inflate(R.layout.activity_adicionar_cidade, null);
+
+                    final TextInputLayout tilNome = mView.findViewById(R.id.text_input_nome);
+                    final TextInputLayout tilX = mView.findViewById(R.id.text_input_x);
+                    final TextInputLayout tilY = mView.findViewById(R.id.text_input_y);
+                    Button btnAdd = mView.findViewById(R.id.btnAdicionar);
+
+                    mBuilder.setView(mView);
+                    final AlertDialog dialog = mBuilder.create();
+                    dialog.show();
+
+                    btnAdd.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            String nome = tilNome.getEditText().getText().toString().trim();
+                            String x = tilX.getEditText().getText().toString().trim();
+                            String y = tilY.getEditText().getText().toString().trim();
+
+                            if(nome.isEmpty())
+                                tilNome.setError("Campo não pode ser nulo");
+                            else
+                            if(x.isEmpty())
+                                tilX.setError("Campo não pode ser nulo");
+                            else
+                            if(!isNumber(x))
+                                tilX.setError("A coordenada não poder ter letras");
+                            else
+                            if(y.isEmpty())
+                                tilY.setError("Campo não pode ser nulo");
+                            else
+                            if(!isNumber(y))
+                                tilX.setError("A coordenada não poder ter letras");
+                            else {
+                                boolean erro = false;
+                                for (Cidade c : cidades)
+                                    if (c.getNome().equals(nome) || c.getX() == Double.parseDouble(x) && c.getY() == Double.parseDouble(y))
+                                        erro = true;
+                                if (erro)
+                                    Toast.makeText(getBaseContext(), "Essa cidade já existe nessas coordenadas ou com esse nome", Toast.LENGTH_SHORT).show();
+                                else
+                                {
+                                    Cidade c = new Cidade(cidades.size(), nome, Double.parseDouble(x), Double.parseDouble(y));
+                                    cidades.add(c);
+                                    lista.add(c.getNome());
+                                    adapter.notifyDataSetChanged();
+                                    Toast.makeText(getBaseContext(), "Cidade adicionada com sucesso", Toast.LENGTH_SHORT).show();
+                                    dialog.cancel();
+                                }
+                            }
+                        }
+                    });
                 }
             });
 
             btnAdicionarCaminho.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    AlertDialog.Builder mBuilder = new AlertDialog.Builder(MainActivity.this);
+                    View mView = getLayoutInflater().inflate(R.layout.activity_adicionar_caminho, null);
 
+                    final TextInputLayout tilOrigem = mView.findViewById(R.id.text_input_origem);
+                    final TextInputLayout tilDestino = mView.findViewById(R.id.text_input_destino);
+                    final TextInputLayout tilDistancia = mView.findViewById(R.id.text_input_distancia);
+                    final TextInputLayout tilTempo = mView.findViewById(R.id.text_input_tempo);
+                    Button btnAdd = mView.findViewById(R.id.btnAdicionar);
+
+                    mBuilder.setView(mView);
+                    final AlertDialog dialog = mBuilder.create();
+                    dialog.show();
+
+                    btnAdd.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            String origem = tilOrigem.getEditText().getText().toString().trim();
+                            String destino = tilDestino.getEditText().getText().toString().trim();
+                            String distancia = tilDistancia.getEditText().getText().toString().trim();
+                            String tempo = tilTempo.getEditText().getText().toString().trim();
+
+                            if(origem.isEmpty())
+                                tilTempo.setError("Campo não pode ser nulo");
+                            else
+                            if(destino.isEmpty())
+                                tilDestino.setError("Campo não pode ser nulo");
+                            else
+                            if(distancia.isEmpty())
+                                tilDistancia.setError("Campo não pode ser nulo");
+                            else
+                            if(!isNumber(distancia))
+                                tilDistancia.setError("A distancia não poder ter letras");
+                            else
+                            if(tempo.isEmpty())
+                                tilTempo.setError("Campo não pode ser nulo");
+                            else
+                            if(!isNumber(tempo))
+                                tilTempo.setError("O tempo não poder ter letras");
+                            else {
+                                boolean erro = false;
+                                for (Caminho c : caminhos)
+                                    if (c.getOrigem().equals(origem) && c.getDestino().equals(destino))
+                                        erro = true;
+                                if (erro)
+                                    Toast.makeText(getBaseContext(), "Esse caminho já existe", Toast.LENGTH_SHORT).show();
+                                else {
+                                    Caminho c = new Caminho(origem, destino, Integer.parseInt(distancia), Integer.parseInt(tempo));
+                                    caminhos.add(c);
+
+
+                                    Toast.makeText(getBaseContext(), "Caminho adicionado com sucesso", Toast.LENGTH_SHORT).show();
+                                    dialog.cancel();
+                                }
+                            }
+                        }
+                    });
                 }
             });
         }
@@ -129,25 +246,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    public void desenharCidade() {
 
-        if(requestCode == 1) {
-
-        }
     }
 
-    public void desenharCidades(Bitmap mBitmap) {
-        Canvas canvas = new Canvas(mBitmap);
-        Paint p = new Paint(Color.BLACK);
-
-        for(Cidade c : cidades)
-            canvas.drawLine(c.getX(), c.getY(), c.getX(), c.getY(), p);
-    }
-
-    public void pesquisar()
-    {
+    public void pesquisar() {
 
     }
 
@@ -167,26 +270,26 @@ public class MainActivity extends AppCompatActivity {
             Cidade c = new Cidade();
             c.setId(Integer.parseInt(s.substring(0, 2).trim()));
             c.setNome(s.substring(2, 18));
-            c.setX(Float.parseFloat(s.substring(18, 24).trim()));
-            c.setY(Float.parseFloat(s.substring(24, 29).trim()));
+
+            String[] x = s.substring(18, 24).trim().split(",");
+            c.setX(Double.parseDouble(x[0] + "." + x[1]));
+
+            String[] y = s.substring(24, 29).trim().split(",");
+            c.setY(Double.parseDouble(y[0] + "." + y[1]));
             cidades.add(c);
+            lista.add(c.getNome());
         }
 
     }
 
-    public void lerArquivo(Scanner sc)
+    public void lerGrafo(Scanner sc)
     {
         String s = "";
 
         for (int i = 0; sc.hasNextLine(); i++)
         {
             s = sc.nextLine();
-            s = s.substring(0,15);
-            if(!isNumber(s))
-            {
-                if(!jaTem(s, lista))
-                    lista.add(s);
-            }
+            Caminho c = new Caminho();
         }
         sc.close();
     }
