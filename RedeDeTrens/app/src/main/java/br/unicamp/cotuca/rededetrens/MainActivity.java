@@ -18,43 +18,33 @@ import java.util.*;
 public class MainActivity extends AppCompatActivity {
 
     private Button btnBuscar;
+    private ArrayList<String> lista;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
         try {
-            btnBuscar = findViewById(R.id.btnBuscar);
-            btnBuscar.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    pesquisar();
-                }
-            });
+            lista = new ArrayList<String>();
 
             TextView tvResultado = findViewById(R.id.txtViewResultados);
-            setContentView(R.layout.activity_main);
+
             AssetManager ass = getAssets();
             Scanner sc = new Scanner(ass.open("GrafoTrem"));
-            String s = "";
-            ArrayList<String> lista = new ArrayList<String>();
-            for (int i = 0; sc.hasNextLine(); i++)
-            {
-                s = sc.nextLine();
-                s = s.substring(0,15);
-                if(!isNumber(s))
-                {
-                    if(!jaTem(s, lista))
-                        lista.add(s);
-                }
-            }
+            lerArquivo(sc);
+            sc.close();
 
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, lista);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
             Spinner spnD = (Spinner) findViewById(R.id.spnDe);
             Spinner spnP = (Spinner) findViewById(R.id.spnPara);
+
             spnD.setAdapter(adapter);
             spnP.setAdapter(adapter);
+
             spnD.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
             {
                 @Override
@@ -82,7 +72,15 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            sc.close();
+            btnBuscar = findViewById(R.id.btnBuscar);
+            btnBuscar.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    pesquisar();
+                }
+            });
+
+
         }
         catch (Exception e)
         {
@@ -96,6 +94,22 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void lerArquivo(Scanner sc)
+    {
+        String s = "";
+
+        for (int i = 0; sc.hasNextLine(); i++)
+        {
+            s = sc.nextLine();
+            s = s.substring(0,15);
+            if(!isNumber(s))
+            {
+                if(!jaTem(s, lista))
+                    lista.add(s);
+            }
+        }
+        sc.close();
+    }
 
     public boolean isNumber(String n)
     {
