@@ -131,10 +131,10 @@ public class MainActivity extends AppCompatActivity {
         {
             s = sc.nextLine();
             Cidade c = new Cidade();
-            c.setId(s.substring(0, 2));
+            c.setId(Integer.parseInt(s.substring(0, 2).trim()));
             c.setNome(s.substring(2, 16));
-            c.setX(Float.parseFloat(s.substring(18, 6)));
-            c.setY(Float.parseFloat(s.substring(24, 6)));
+            c.setX(Float.parseFloat(s.substring(18, 6).trim()));
+            c.setY(Float.parseFloat(s.substring(24, 6).trim()));
             cidades.add(c);
         }
 
