@@ -3,6 +3,9 @@ package br.unicamp.cotuca.rededetrens;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.res.AssetManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.icu.text.ScientificNumberFormatter;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.*;
@@ -17,8 +20,10 @@ import java.util.*;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button btnBuscar;
+    private Button btnBuscar, btnAdicionarCidade, btnAdicionarCaminho;
     private ArrayList<String> lista;
+    private ImageView ivImagem;
+    private TextView tvResultado;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -28,8 +33,11 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             lista = new ArrayList<String>();
-
-            TextView tvResultado = findViewById(R.id.txtViewResultados);
+            tvResultado = findViewById(R.id.txtViewResultados);
+            btnAdicionarCaminho = findViewById(R.id.btnCaminho);
+            btnAdicionarCidade = findViewById(R.id.btnCidade);
+            btnBuscar = findViewById(R.id.btnBuscar);
+            ivImagem = findViewById(R.id.imgView);
 
             AssetManager ass = getAssets();
             Scanner sc = new Scanner(ass.open("GrafoTrem"));
@@ -44,6 +52,13 @@ public class MainActivity extends AppCompatActivity {
 
             spnD.setAdapter(adapter);
             spnP.setAdapter(adapter);
+
+            sc = new Scanner(ass.open("Cidades"));
+
+            BitmapDrawable drawable = (BitmapDrawable) ivImagem.getDrawable();
+            Bitmap mBitmap = drawable.getBitmap();
+
+
 
             spnD.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
             {
@@ -72,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            btnBuscar = findViewById(R.id.btnBuscar);
+
             btnBuscar.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -80,7 +95,19 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
+            btnAdicionarCidade.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
+                }
+            });
+
+            btnAdicionarCaminho.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
         }
         catch (Exception e)
         {
