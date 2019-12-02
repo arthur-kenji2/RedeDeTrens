@@ -24,7 +24,6 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> lista;
     private ImageView ivImagem;
     private TextView tvResultado;
-    private ArrayList<Cidade> cidades;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -43,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
             AssetManager ass = getAssets();
             Scanner sc = new Scanner(ass.open("GrafoTrem"));
             lerArquivo(sc);
+            sc.close();
 
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, lista);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -54,9 +54,6 @@ public class MainActivity extends AppCompatActivity {
             spnP.setAdapter(adapter);
 
             sc = new Scanner(ass.open("Cidades"));
-            lerCidades(sc);
-
-            sc.close();
 
             BitmapDrawable drawable = (BitmapDrawable) ivImagem.getDrawable();
             Bitmap mBitmap = drawable.getBitmap();
@@ -154,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
                     lista.add(s);
             }
         }
-
+        sc.close();
     }
 
     public boolean isNumber(String n)
