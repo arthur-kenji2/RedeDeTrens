@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class BucketHash
 {
-    private int SIZE = 17;
+    private int SIZE = 100;
     ArrayList[] data;
 
 
