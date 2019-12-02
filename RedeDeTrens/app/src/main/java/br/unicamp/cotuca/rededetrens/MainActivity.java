@@ -121,13 +121,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void fazerTabela()
-    {
-        BucketHash balde = new BucketHash();
-        for(int i = 0; i)
-            balde.Insert();
-    }
-
     public void lerArquivo(Scanner sc)
     {
         String s = "";
