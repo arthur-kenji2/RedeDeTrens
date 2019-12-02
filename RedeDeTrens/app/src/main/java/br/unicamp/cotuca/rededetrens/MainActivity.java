@@ -55,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
             spnP.setAdapter(adapter);
 
             sc = new Scanner(ass.open("Cidades"));
+            lerCidades(sc);
+            sc.close();
 
             BitmapDrawable drawable = (BitmapDrawable) ivImagem.getDrawable();
             Bitmap mBitmap = drawable.getBitmap();
@@ -130,9 +132,9 @@ public class MainActivity extends AppCompatActivity {
             s = sc.nextLine();
             Cidade c = new Cidade();
             c.setId(Integer.parseInt(s.substring(0, 2).trim()));
-            c.setNome(s.substring(2, 16));
-            c.setX(Float.parseFloat(s.substring(18, 6).trim()));
-            c.setY(Float.parseFloat(s.substring(24, 6).trim()));
+            c.setNome(s.substring(2, 18));
+            c.setX(Float.parseFloat(s.substring(18, 24).trim()));
+            c.setY(Float.parseFloat(s.substring(24, 29).trim()));
             cidades.add(c);
         }
 
