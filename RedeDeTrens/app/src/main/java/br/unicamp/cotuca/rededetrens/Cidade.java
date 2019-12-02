@@ -1,23 +1,26 @@
 package br.unicamp.cotuca.rededetrens;
 
 public class Cidade {
-    private int id;
+    private String id;
     private String nome;
     private float x;
     private float y;
 
-    public Cidade(int id, String nome, float x, float y) {
+    public Cidade(){
+    }
+
+    public Cidade(String id, String nome, float x, float y) {
         this.id = id;
         this.nome = nome;
         this.x = x;
         this.y = y;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
