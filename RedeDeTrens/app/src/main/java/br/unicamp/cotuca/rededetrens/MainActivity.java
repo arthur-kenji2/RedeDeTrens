@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> lista;
     private ImageView ivImagem;
     private TextView tvResultado;
+    private ArrayList<Cidade> cidades;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
