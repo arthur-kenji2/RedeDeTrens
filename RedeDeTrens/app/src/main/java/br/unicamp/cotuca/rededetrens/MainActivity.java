@@ -1,9 +1,14 @@
 package br.unicamp.cotuca.rededetrens;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.icu.text.ScientificNumberFormatter;
 import android.os.Bundle;
@@ -58,10 +63,15 @@ public class MainActivity extends AppCompatActivity {
             lerCidades(sc);
             sc.close();
 
+            //fazerTabela();
+
             BitmapDrawable drawable = (BitmapDrawable) ivImagem.getDrawable();
             Bitmap mBitmap = drawable.getBitmap();
 
+            desenharCidades(mBitmap);
 
+            //OutputStream outputStream = new FileOutputStream(new File(String.valueOf(ass.open("Cidades"))), true);
+            //OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
 
             spnD.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
             {
@@ -101,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
             btnAdicionarCidade.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
+                    startActivityForResult(new Intent(MainActivity.this, AdicionarCidade.class), 1);
                 }
             });
 
@@ -119,9 +129,33 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == 1) {
+
+        }
+    }
+
+    public void desenharCidades(Bitmap mBitmap) {
+        Canvas canvas = new Canvas(mBitmap);
+        Paint p = new Paint(Color.BLACK);
+
+        for(Cidade c : cidades)
+            canvas.drawLine(c.getX(), c.getY(), c.getX(), c.getY(), p);
+    }
+
     public void pesquisar()
     {
 
+    }
+
+    public void fazerTabela()
+    {
+        BucketHash bh = new BucketHash();
+        for(int i = 0; i < cidades.size(); i++)
+            bh.Insert(cidades.get(i).getNome());
     }
 
     public void lerCidades(Scanner sc)
