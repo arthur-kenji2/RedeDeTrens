@@ -7,7 +7,6 @@ public class Grafo
     private Vertice[] vertices;
     private int[][] adjMatrix;
     int numVerts;
-    DataGridView dgv;
 
     /// DJIKSTRA
     DistOriginal[] percurso;
@@ -16,9 +15,8 @@ public class Grafo
     int doInicioAteAtual;   // global usada para ajustar menor caminho com Djikstra
     int nTree;
 
-    public Grafo(DataGridView dgv)
+    public Grafo()
     {
-        this.dgv = dgv;
         vertices = new Vertice[NUM_VERTICES];
         adjMatrix = new int[NUM_VERTICES][NUM_VERTICES];
         numVerts = 0;
@@ -35,12 +33,6 @@ public class Grafo
     {
         vertices[numVerts] = new Vertice(label);
         numVerts++;
-        if (dgv != null)  // se foi passado como parâmetro um dataGridView para exibição
-        {              // se realiza o seu ajuste para a quantidade de vértices
-            dgv.RowCount = numVerts + 1;
-            dgv.ColumnCount = numVerts + 1;
-            dgv.Columns[numVerts].Width = 45;
-        }
     }
 
 
