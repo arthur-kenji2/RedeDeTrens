@@ -34,6 +34,7 @@ public class BucketHash
         if (!data[hash_value].contains(item))
             data[hash_value].add(item);
     }
+
     public boolean Remove(String item)
     {
         int hash_value = Hash(item);

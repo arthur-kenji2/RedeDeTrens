@@ -1,6 +1,6 @@
 package br.unicamp.cotuca.rededetrens;
 
-public class Caminho {
+public class Caminho implements Comparable<Caminho>{
     private String origem;
     private String destino;
     private int distancia;
@@ -46,5 +46,14 @@ public class Caminho {
 
     public void setTempo(int tempo) {
         this.tempo = tempo;
+    }
+
+    @Override
+    public int compareTo(Caminho o) {
+        if(this.getOrigem().compareTo(o.getOrigem()) > 0)
+            return 1;
+        if(this.getOrigem().compareTo(o.getOrigem()) < 0)
+            return -1;
+        return 0;
     }
 }

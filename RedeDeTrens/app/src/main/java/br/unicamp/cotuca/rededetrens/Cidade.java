@@ -1,15 +1,15 @@
 package br.unicamp.cotuca.rededetrens;
 
-public class Cidade {
+public class Cidade implements Comparable<Cidade> {
     private int id;
     private String nome;
-    private double x;
-    private double y;
+    private float x;
+    private float y;
 
     public Cidade(){
     }
 
-    public Cidade(int id, String nome, double x, double y) {
+    public Cidade(int id, String nome, float x, float y) {
         this.id = id;
         this.nome = nome;
         this.x = x;
@@ -32,19 +32,28 @@ public class Cidade {
         this.nome = nome;
     }
 
-    public double getX() {
+    public float getX() {
         return x;
     }
 
-    public void setX(double x) {
+    public void setX(float x) {
         this.x = x;
     }
 
-    public double getY() {
+    public float getY() {
         return y;
     }
 
-    public void setY(double y) {
+    public void setY(float y) {
         this.y = y;
+    }
+
+    @Override
+    public int compareTo(Cidade o) {
+        if(this.getNome().compareTo(o.getNome()) > 0)
+            return 1;
+        if(this.getNome().compareTo(o.getNome()) < 0)
+            return -1;
+        return 0;
     }
 }
