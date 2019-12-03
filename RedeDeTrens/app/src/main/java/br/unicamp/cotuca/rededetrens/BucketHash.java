@@ -4,15 +4,14 @@ import java.util.ArrayList;
 
 public class BucketHash
 {
-    private int SIZE = 100;
-    ArrayList[] data;
-
+    private final int SIZE = 103;
+    private ListaSimples<Cidade>[]  data;
 
     public BucketHash()
     {
-        data = new ArrayList[SIZE];
+        data = new ListaSimples[SIZE];
         for(int i = 0; i < SIZE; i++)
-            data[i] = new ArrayList(1);
+            data[i] = new ListaSimples<>();
     }
 
     public int Hash(String s)
@@ -28,25 +27,26 @@ public class BucketHash
         return (int)tot;
     }
 
-    public void Insert(String item)
+    public void Insert(Cidade c)
     {
-        int hash_value = Hash(item);
-        if (!data[hash_value].contains(item))
-            data[hash_value].add(item);
+        int hash_value = Hash(c.getNome());
+        if (!data[hash_value].existeDado(c))
+            data[hash_value].inserirAposFim(c);
     }
 
-    public boolean Remove(String item)
+    public boolean Remove(Cidade c)
     {
-        int hash_value = Hash(item);
-        if (data[hash_value].contains(item))
+        int hash_value = Hash(c.getNome());
+        if (data[hash_value].existeDado(c))
         {
-            data[hash_value].remove(item);
+            data[hash_value].remove(c);
             return true;
         }
         return false;
     }
 
-
-
-
+    public ListaSimples<Cidade> getPosicao(int hash)
+    {
+        return data[hash];
+    }
 }

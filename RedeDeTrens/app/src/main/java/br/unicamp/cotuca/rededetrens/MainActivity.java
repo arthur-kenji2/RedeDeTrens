@@ -39,10 +39,10 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> lista;
     private ImageView ivImagem;
     private TextView tvResultado;
-    private ListaSimples<Cidade> cidades;
     private ListaSimples<Caminho> caminhos;
     private Bitmap mBitmap;
     private OutputStream copiaCidade, copiaGrafo;
+    private BucketHash tabelaCidades;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -52,13 +52,13 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             lista = new ArrayList<String>();
-            cidades = new ListaSimples<>();
             caminhos = new ListaSimples<>();
             tvResultado = findViewById(R.id.txtViewResultados);
             btnAdicionarCaminho = findViewById(R.id.btnCaminho);
             btnAdicionarCidade = findViewById(R.id.btnCidade);
             btnBuscar = findViewById(R.id.btnBuscar);
             ivImagem = findViewById(R.id.imgView);
+            tabelaCidades = new BucketHash();
 
             AssetManager ass = getAssets();
 
@@ -74,8 +74,10 @@ public class MainActivity extends AppCompatActivity {
             spnD.setAdapter(adapter);
             spnP.setAdapter(adapter);
 
+            ListaSimples<Cidade> cidades = new ListaSimples<>();
             sc = new Scanner(ass.open("Cidades"));
-            lerCidades(sc);
+            lerCidades(sc, cidades);
+            inserirTabela(cidades);
             sc.close();
 
             mBitmap = decodeSampledBitmapFromResource(getResources(), R.drawable.mapaespanhaportugal, ivImagem.getMaxWidth(), ivImagem.getMaxHeight());
@@ -179,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
                                 else
                                 {
                                     Cidade c = new Cidade(cidades.tamanho, nome, Float.parseFloat(x), Float.parseFloat(y));
-                                    cidades.inserirAposFim(c);
+                                    tabelaCidades.Insert(c);
                                     lista.add(c.getNome());
 
                                     Bitmap mBitnew = mBitmap.copy(mBitmap.getConfig(), true);
@@ -300,6 +302,17 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void inserirTabela(ListaSimples<Cidade> cidades) {
+        for(int i = 0; i < cidades.tamanho; i++) {
+            try {
+                tabelaCidades.Insert(cidades.get(i));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
     public void escreverNome(Cidade c, Bitmap mBitnew)
     {
         Canvas canvas = new Canvas(mBitnew);
@@ -343,7 +356,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void lerCidades(Scanner sc)
+    public void lerCidades(Scanner sc, ListaSimples<Cidade> cidades)
     {
         String s = "";
         for(int i = 0; sc.hasNextLine(); i++)
