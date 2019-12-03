@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             lista = new ArrayList<String>();
             cidades = new ArrayList<>();
+            caminhos = new ArrayList<>();
             tvResultado = findViewById(R.id.txtViewResultados);
             btnAdicionarCaminho = findViewById(R.id.btnCaminho);
             btnAdicionarCidade = findViewById(R.id.btnCidade);
@@ -80,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
             mBitmap = Bitmap.createScaledBitmap(mBitmap , 70, 70, true);
             //ivImagem.setImageBitmap(mBitmap);
 
-            canvas = new Canvas(mBitmap);
+            //canvas = new Canvas(mBitmap);
             caneta = new Paint();
             caneta.setColor(Color.BLACK);
 
@@ -290,6 +291,11 @@ public class MainActivity extends AppCompatActivity {
         {
             s = sc.nextLine();
             Caminho c = new Caminho();
+            c.setOrigem(s.substring(0,15));
+            c.setDestino(s.substring(15, 30));
+            c.setDistancia(Integer.parseInt(s.substring(30, 35).trim()));
+            c.setTempo(Integer.parseInt(s.substring(35, 38).trim()));
+            caminhos.add(c);
         }
         sc.close();
     }
