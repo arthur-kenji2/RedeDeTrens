@@ -100,7 +100,7 @@ public class Grafo
     }
 
 
-    public String Caminho(int inicioDoPercurso, int finalDoPercurso, ListBox lista)
+    /*public String Caminho(int inicioDoPercurso, int finalDoPercurso, ListBox lista)
     {
         for (int j = 0; j < numVerts; j++)
             vertices[j].foiVisitado = false;
@@ -231,5 +231,5 @@ public class Grafo
         else
             resultado += " --> " + vertices[finalDoPercurso].rotulo;
         return resultado;
-    }
+    }*/
 }

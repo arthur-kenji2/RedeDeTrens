@@ -168,45 +168,46 @@ public class MainActivity extends AppCompatActivity {
                                 tilX.setError("A coordenada não poder ter letras ou utilize \'.\' ao inves de ,");
                             else {
                                 boolean erro = false;
-                                for (int i = 0; i < cidades.tamanho; i++) {
+                                for (int i = 0; i < lista.size(); i++) {
                                     try {
-                                        if (cidades.get(i).getNome().equals(nome) || cidades.get(i).getX() == Double.parseDouble(x) && cidades.get(i).getY() == Double.parseDouble(y))
+                                        if (tabelaCidades.getCidade(nome) != null && tabelaCidades.getCidade(nome).getNome().equals(nome))
                                             erro = true;
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
                                 }
                                 if (erro)
-                                    Toast.makeText(getBaseContext(), "Essa cidade já existe nessas coordenadas ou com esse nome", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getBaseContext(), "Essa cidade já existe", Toast.LENGTH_SHORT).show();
                                 else
                                 {
-                                    Cidade c = new Cidade(cidades.tamanho, nome, Float.parseFloat(x), Float.parseFloat(y));
-                                    tabelaCidades.Insert(c);
-                                    lista.add(c.getNome());
-
-                                    Bitmap mBitnew = mBitmap.copy(mBitmap.getConfig(), true);
-                                    desenharCidade(c, mBitnew);
-                                    escreverNome(c, mBitnew);
-
-                                    mBitmap = mBitnew;
-
-                                    String id = String.format("%-02d", c.getId());
-                                    String cidadeNome = String.format("%-15s", c.getNome());
-                                    String coordX = String.format("&-06d", c.getX());
-                                    String coordY = String.format("&05d", c.getY());
-
-                                    String linha = id + cidadeNome + coordX + coordY;
-
                                     try {
+                                        Cidade c = new Cidade(lista.size(), nome, Float.parseFloat(x), Float.parseFloat(y));
+                                        tabelaCidades.Insert(c);
+                                        lista.add(c.getNome());
+
+                                        Bitmap mBitnew = mBitmap.copy(mBitmap.getConfig(), true);
+                                        desenharCidade(c, mBitnew);
+                                        escreverNome(c, mBitnew);
+
+                                        mBitmap = mBitnew;
+
+                                        String id = String.format("%-2d", c.getId());
+                                        String cidadeNome = String.format("%-15s", c.getNome());
+                                        String coordX = String.format("&-6d", c.getX());
+                                        String coordY = String.format("&5d", c.getY());
+
+                                        String linha = id + cidadeNome + coordX + coordY;
+
                                         copiaCidade.write(linha.getBytes());
+
+                                        adapter.notifyDataSetChanged();
+                                        Toast.makeText(getBaseContext(), "Cidade adicionada com sucesso", Toast.LENGTH_SHORT).show();
+                                        dialog.cancel();
                                     }
-                                    catch (IOException e) {
+                                    catch (Exception e)
+                                    {
                                         e.printStackTrace();
                                     }
-
-                                    adapter.notifyDataSetChanged();
-                                    Toast.makeText(getBaseContext(), "Cidade adicionada com sucesso", Toast.LENGTH_SHORT).show();
-                                    dialog.cancel();
                                 }
                             }
                         }
@@ -274,8 +275,8 @@ public class MainActivity extends AppCompatActivity {
 
                                     String txtOrigem = String.format("%-15s", c.getOrigem());
                                     String txtDestino= String.format("%-16s", c.getDestino());
-                                    String txtDistancia = String.format("&-05d", c.getDistancia());
-                                    String txtTempo = String.format("&03d", c.getTempo());
+                                    String txtDistancia = String.format("&-5d", c.getDistancia());
+                                    String txtTempo = String.format("&3d", c.getTempo());
 
                                     String linha = txtOrigem + txtDestino + txtDistancia + txtTempo;
 

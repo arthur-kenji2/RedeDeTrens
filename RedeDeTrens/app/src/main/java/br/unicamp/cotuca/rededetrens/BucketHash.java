@@ -45,6 +45,21 @@ public class BucketHash
         return false;
     }
 
+    public Cidade getCidade(String nome)
+    {
+        ListaSimples<Cidade> c = getPosicao(Hash(nome));
+        try {
+            for (int i = 0; i < c.tamanho; i++)
+                if (c.get(i).getNome().equals(nome))
+                    return c.get(i);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public ListaSimples<Cidade> getPosicao(int hash)
     {
         return data[hash];
