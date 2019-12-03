@@ -1,5 +1,7 @@
 package br.unicamp.cotuca.rededetrens;
 
+import java.util.Stack;
+
 public class Grafo
 {
 
@@ -100,7 +102,8 @@ public class Grafo
     }
 
 
-    /*public String Caminho(int inicioDoPercurso, int finalDoPercurso, ListBox lista)
+    public String Caminho(int inicioDoPercurso, int finalDoPercurso, ListBox lista)
+
     {
         for (int j = 0; j < numVerts; j++)
             vertices[j].foiVisitado = false;
@@ -130,10 +133,10 @@ public class Grafo
 
             // visitamos o vértice com a menor distância desde o inicioDoPercurso
             vertices[verticeAtual].foiVisitado = true;
-            AjustarMenorCaminho(lista);
+            AjustarMenorCaminho();
         }
 
-        return ExibirPercursos(inicioDoPercurso, finalDoPercurso, lista);
+        return ExibirPercursos(inicioDoPercurso, finalDoPercurso);
     }
 
     public int ObterMenor()
@@ -149,7 +152,7 @@ public class Grafo
         return indiceDaMinima;
     }
 
-    public void AjustarMenorCaminho(ListBox lista)
+    public void AjustarMenorCaminho()
     {
         for (int coluna = 0; coluna < numVerts; coluna++)
             if (!vertices[coluna].foiVisitado)       // para cada vértice ainda não visitado
@@ -169,67 +172,35 @@ public class Grafo
                 {
                     percurso[coluna].verticePai = verticeAtual;
                     percurso[coluna].distancia = doInicioAteMargem;
-                    ExibirTabela(lista);
                 }
             }
-        lista.Items.Add("==================Caminho ajustado==============");
     }
 
-    public void ExibirTabela(ListBox lista)
+
+    public String[] ExibirPercursos(int inicioDoPercurso, int finalDoPercurso)
     {
-        String dist = "";
-        lista.Items.Add("Vértice\tVisitado?\tPeso\tVindo de");
-        for (int i = 0; i < numVerts; i++)
-        {
-            if (percurso[i].distancia == infinity)
-                dist = "inf";
-            else
-                dist = Convert.ToString(percurso[i].distancia);
 
-            lista.Items.Add(vertices[i].rotulo + "\t" + vertices[i].foiVisitado +
-                    "\t\t" + dist + "\t" + vertices[percurso[i].verticePai].rotulo);
-        }
-        lista.Items.Add("-----------------------------------------------------");
-    }
+        String[] caminho = new String[percurso.length];
 
-    public String ExibirPercursos(int inicioDoPercurso, int finalDoPercurso, ListBox lista) {
-        String linha = "", resultado = "";
-        for (int j = 0; j < numVerts; j++) {
-            linha += vertices[j].rotulo + "=";
-            if (percurso[j].distancia == infinity)
-                linha += "inf";
-            else
-                linha += percurso[j].distancia;
-            String pai = vertices[percurso[j].verticePai].rotulo;
-            linha += "(" + pai + ") ";
-        }
-        lista.Items.Add(linha);
-        lista.Items.Add("");
-        lista.Items.Add("");
-        lista.Items.Add("Caminho entre " + vertices[inicioDoPercurso].rotulo +
-                " e " + vertices[finalDoPercurso].rotulo);
-        lista.Items.Add("");
-
-        int onde = finalDoPercurso;
-        Stack<string> pilha = new Stack<string>();
+        Stack<String> pilha = new Stack<String>();
 
         int cont = 0;
-        while (onde != inicioDoPercurso) {
-            onde = percurso[onde].verticePai;
-            pilha.Push(vertices[onde].rotulo);
-            cont++;
+        for(cont = 0; finalDoPercurso != inicioDoPercurso; cont++)
+        {
+            finalDoPercurso = percurso[finalDoPercurso].verticePai;
+            pilha.push(vertices[finalDoPercurso].rotulo);
         }
 
-        while (pilha.Count != 0) {
-            resultado += pilha.Pop();
-            if (pilha.Count != 0)
-                resultado += " --> ";
-        }
+
+        int i = 0;
+        for(i = 0; pilha.size() != 0; i++)
+            caminho[i] = pilha.pop();
 
         if ((cont == 1) && (percurso[finalDoPercurso].distancia == infinity))
-            resultado = "Não há caminho";
+            return null;
         else
+
             resultado += " --> " + vertices[finalDoPercurso].rotulo;
         return resultado;
-    }*/
+    }
 }
