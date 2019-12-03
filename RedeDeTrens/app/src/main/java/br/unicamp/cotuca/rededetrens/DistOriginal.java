@@ -2,12 +2,12 @@ package br.unicamp.cotuca.rededetrens;
 
 public class DistOriginal
 {
-    public int distancia;
+    public int peso;
     public int verticePai;
 
-    public DistOriginal(int vp, int d)
+    public DistOriginal(int vp, int p)
     {
-        distancia = d;
-        verticePai = vp;
+        this.peso = p;
+        this.verticePai = vp;
     }
 }

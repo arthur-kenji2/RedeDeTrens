@@ -1,7 +1,8 @@
 package br.unicamp.cotuca.rededetrens;
 
-public class ListaSimples<Dado extends Comparable<Dado>>  {
-    private NoLista<Dado> primeiro,ultimo, anterior, atual;
+public class ListaSimples<Dado extends Comparable<Dado>> {
+
+    private NoLista<Dado> primeiro, ultimo, anterior, atual;
     int tamanho;
 
     public ListaSimples()
@@ -159,5 +160,21 @@ public class ListaSimples<Dado extends Comparable<Dado>>  {
         removerNo(this.anterior, this.atual);
 
         return true;
+    }
+
+    public NoLista<Dado> getPrimeiro() {
+        return primeiro;
+    }
+
+    public NoLista<Dado> getUltimo() {
+        return ultimo;
+    }
+
+    public NoLista<Dado> getAnterior() {
+        return anterior;
+    }
+
+    public NoLista<Dado> getAtual() {
+        return atual;
     }
 }

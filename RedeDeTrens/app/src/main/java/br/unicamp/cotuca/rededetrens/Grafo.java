@@ -5,17 +5,17 @@ import java.util.Stack;
 public class Grafo
 {
 
-    private final int NUM_VERTICES = 20;
+    private final int NUM_VERTICES = 100;
     private Vertice[] vertices;
     private int[][] adjMatrix;
-    int numVerts;
+    private int numVerts;
 
     /// DJIKSTRA
-    DistOriginal[] percurso;
-    int infinity = 1000000;
-    int verticeAtual;   // global usada para indicar o vértice atualmente sendo visitado
-    int doInicioAteAtual;   // global usada para ajustar menor caminho com Djikstra
-    int nTree;
+    private DistOriginal[] percurso;
+    private int infinity = 1000000;
+    private int verticeAtual;   // global usada para indicar o vértice atualmente sendo visitado
+    private int doInicioAteAtual;   // global usada para ajustar menor caminho com Djikstra
+    private int nTree;
 
     public Grafo()
     {
@@ -42,7 +42,6 @@ public class Grafo
     {
         adjMatrix[origem][destino] = peso;
     }
-
 
 
     public int SemSucessores() 	// encontra e retorna a linha de um vértice sem sucessores
@@ -102,7 +101,7 @@ public class Grafo
     }
 
 
-    public String Caminho(int inicioDoPercurso, int finalDoPercurso, ListBox lista)
+    public String[] Caminho(int inicioDoPercurso, int finalDoPercurso)
 
     {
         for (int j = 0; j < numVerts; j++)
@@ -123,13 +122,13 @@ public class Grafo
             int indiceDoMenor = ObterMenor();
 
             // e anotamos essa menor distância
-            int distanciaMinima = percurso[indiceDoMenor].distancia;
+            int distanciaMinima = percurso[indiceDoMenor].peso;
 
 
             // o vértice com a menor distância passa a ser o vértice atual
             // para compararmos com a distância calculada em AjustarMenorCaminho()
             verticeAtual = indiceDoMenor;
-            doInicioAteAtual = percurso[indiceDoMenor].distancia;
+            doInicioAteAtual = percurso[indiceDoMenor].peso;
 
             // visitamos o vértice com a menor distância desde o inicioDoPercurso
             vertices[verticeAtual].foiVisitado = true;
@@ -144,9 +143,9 @@ public class Grafo
         int distanciaMinima = infinity;
         int indiceDaMinima = 0;
         for (int j = 0; j < numVerts; j++)
-            if (!(vertices[j].foiVisitado) && (percurso[j].distancia < distanciaMinima))
+            if (!(vertices[j].foiVisitado) && (percurso[j].peso < distanciaMinima))
             {
-                distanciaMinima = percurso[j].distancia;
+                distanciaMinima = percurso[j].peso;
                 indiceDaMinima = j;
             }
         return indiceDaMinima;
@@ -167,40 +166,44 @@ public class Grafo
                 // quando encontra uma distância menor, marca o vértice a partir do
                 // qual chegamos no vértice de índice coluna, e a soma da distância
                 // percorrida para nele chegar
-                int distanciaDoCaminho = percurso[coluna].distancia;
+                int distanciaDoCaminho = percurso[coluna].peso;
                 if (doInicioAteMargem < distanciaDoCaminho)
                 {
                     percurso[coluna].verticePai = verticeAtual;
-                    percurso[coluna].distancia = doInicioAteMargem;
+                    percurso[coluna].peso = doInicioAteMargem;
                 }
             }
     }
 
-
     public String[] ExibirPercursos(int inicioDoPercurso, int finalDoPercurso)
     {
+        String[] oCaminho = new String[percurso.length];
 
-        String[] caminho = new String[percurso.length];
-
+        int onde = finalDoPercurso;
         Stack<String> pilha = new Stack<String>();
 
         int cont = 0;
-        for(cont = 0; finalDoPercurso != inicioDoPercurso; cont++)
+        while (onde != inicioDoPercurso)
         {
-            finalDoPercurso = percurso[finalDoPercurso].verticePai;
-            pilha.push(vertices[finalDoPercurso].rotulo);
+            onde = percurso[onde].verticePai;
+            pilha.push(vertices[onde].rotulo);
+            cont++;
         }
 
+        int contador = 0;
+        while (pilha.size() != 0)
+        {
+            oCaminho[contador] = pilha.pop();
 
-        int i = 0;
-        for(i = 0; pilha.size() != 0; i++)
-            caminho[i] = pilha.pop();
+            contador++;
+        }
 
-        if ((cont == 1) && (percurso[finalDoPercurso].distancia == infinity))
+        if ((cont == 1) && (percurso[finalDoPercurso].peso == infinity))
             return null;
         else
+            oCaminho[contador] = vertices[finalDoPercurso].rotulo;
 
-            resultado += " --> " + vertices[finalDoPercurso].rotulo;
-        return resultado;
+        oCaminho[contador + 1] = percurso[finalDoPercurso].peso + "";
+        return oCaminho;
     }
 }
