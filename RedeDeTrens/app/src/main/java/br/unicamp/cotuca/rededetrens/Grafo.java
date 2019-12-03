@@ -179,33 +179,28 @@ public class Grafo
     public String[] ExibirPercursos(int inicioDoPercurso, int finalDoPercurso)
     {
 
-        String[] oCaminho = new String[percurso.length];
+        String[] caminho = new String[percurso.length];
 
-        int onde = finalDoPercurso;
         Stack<String> pilha = new Stack<String>();
 
         int cont = 0;
-        while (onde != inicioDoPercurso)
+        for(cont = 0; finalDoPercurso != inicioDoPercurso; cont++)
         {
-            onde = percurso[onde].verticePai;
-            pilha.push(vertices[onde].rotulo);
-            cont++;
+            finalDoPercurso = percurso[finalDoPercurso].verticePai;
+            pilha.push(vertices[finalDoPercurso].rotulo);
         }
 
-        int contador = 0;
-        while (pilha.size() != 0)
-        {
-            oCaminho[contador] = pilha.pop();
 
-            contador++;
-        }
+        int i = 0;
+        for(i = 0; pilha.size() != 0; i++)
+            caminho[i] = pilha.pop();
 
         if ((cont == 1) && (percurso[finalDoPercurso].distancia == infinity))
             return null;
         else
-            oCaminho[contador] = vertices[finalDoPercurso].rotulo;
+            caminho[i] = vertices[finalDoPercurso].rotulo;
 
-        oCaminho[contador + 1] = percurso[finalDoPercurso].distancia + "";
-        return oCaminho;
+        caminho[i + 1] = percurso[finalDoPercurso].distancia + "";
+        return caminho;
     }
 }
