@@ -4,7 +4,6 @@ import java.util.Stack;
 
 public class Grafo
 {
-
     private final int NUM_VERTICES = 100;
     private Vertice[] vertices;
     private int[][] adjMatrix;
@@ -19,32 +18,30 @@ public class Grafo
 
     public Grafo()
     {
-        vertices = new Vertice[NUM_VERTICES];
-        adjMatrix = new int[NUM_VERTICES][NUM_VERTICES];
-        numVerts = 0;
-        nTree = 0;
+        this.vertices = new Vertice[NUM_VERTICES];
+        this.adjMatrix = new int[NUM_VERTICES][NUM_VERTICES];
+        this.numVerts = 0;
+        this.nTree = 0;
 
         for (int j = 0; j < NUM_VERTICES; j++)      // zera toda a matriz
             for (int k = 0; k < NUM_VERTICES; k++)
-                adjMatrix[j][k] = infinity;         // distância tão grande que não existe
+                this.adjMatrix[j][k] = infinity;         // distância tão grande que não existe
 
-        percurso = new DistOriginal[NUM_VERTICES];
+        this.percurso = new DistOriginal[NUM_VERTICES];
     }
 
-    public void NovoVertice(String label)
+    public void novoVertice(String label)
     {
         vertices[numVerts] = new Vertice(label);
-        numVerts++;
+        this.numVerts++;
     }
 
-
-    public void NovaAresta(int origem, int destino, int peso)
+    public void novaAresta(int origem, int destino, int peso)
     {
         adjMatrix[origem][destino] = peso;
     }
 
-
-    public int SemSucessores() 	// encontra e retorna a linha de um vértice sem sucessores
+    public int semSucessores() // encontra e retorna a linha de um vértice sem sucessores
     {
         boolean temAresta;
         for (int linha = 0; linha < numVerts; linha++)
@@ -52,10 +49,10 @@ public class Grafo
             temAresta = false;
             for (int col = 0; col < numVerts; col++)
                 if (adjMatrix[linha][col] != infinity)
-            {
-                temAresta = true;
-                break;
-            }
+                {
+                    temAresta = true;
+                    break;
+                }
             if (!temAresta)
                 return linha;
         }
@@ -68,7 +65,6 @@ public class Grafo
         {
             for (int j = vert; j < numVerts - 1; j++)
                 vertices[j] = vertices[j + 1];
-
 
             for (int row = vert; row < numVerts; row++)
                 moverLinhas(row, numVerts - 1);
@@ -91,17 +87,15 @@ public class Grafo
                 adjMatrix[row][col] = adjMatrix[row][col + 1]; // desloca para excluir
     }
 
-
-    private int ObterVerticeAdjacenteNaoVisitado(int v)
+    private int obterVerticeAdjacenteNaoVisitado(int v)
     {
         for (int j = 0; j <= numVerts - 1; j++)
             if ((adjMatrix[v][j] != infinity) && (!vertices[j].foiVisitado))
-        return j;
+                return j;
         return -1;
     }
 
-
-    public String[] Caminho(int inicioDoPercurso, int finalDoPercurso)
+    public String[] caminho(int inicioDoPercurso, int finalDoPercurso)
 
     {
         for (int j = 0; j < numVerts; j++)
@@ -119,11 +113,10 @@ public class Grafo
         for (int nTree = 0; nTree < numVerts; nTree++)
         {
             // Procuramos a saída não visitada do vértice inicioDoPercurso com a menor distância
-            int indiceDoMenor = ObterMenor();
+            int indiceDoMenor = obterMenor();
 
             // e anotamos essa menor distância
             int distanciaMinima = percurso[indiceDoMenor].peso;
-
 
             // o vértice com a menor distância passa a ser o vértice atual
             // para compararmos com a distância calculada em AjustarMenorCaminho()
@@ -132,13 +125,13 @@ public class Grafo
 
             // visitamos o vértice com a menor distância desde o inicioDoPercurso
             vertices[verticeAtual].foiVisitado = true;
-            AjustarMenorCaminho();
+            ajustarMenorCaminho();
         }
 
-        return ExibirPercursos(inicioDoPercurso, finalDoPercurso);
+        return exibirPercursos(inicioDoPercurso, finalDoPercurso);
     }
 
-    public int ObterMenor()
+    public int obterMenor()
     {
         int distanciaMinima = infinity;
         int indiceDaMinima = 0;
@@ -151,7 +144,7 @@ public class Grafo
         return indiceDaMinima;
     }
 
-    public void AjustarMenorCaminho()
+    public void ajustarMenorCaminho()
     {
         for (int coluna = 0; coluna < numVerts; coluna++)
             if (!vertices[coluna].foiVisitado)       // para cada vértice ainda não visitado
@@ -175,7 +168,7 @@ public class Grafo
             }
     }
 
-    public String[] ExibirPercursos(int inicioDoPercurso, int finalDoPercurso)
+    public String[] exibirPercursos(int inicioDoPercurso, int finalDoPercurso)
     {
         String[] oCaminho = new String[percurso.length];
 

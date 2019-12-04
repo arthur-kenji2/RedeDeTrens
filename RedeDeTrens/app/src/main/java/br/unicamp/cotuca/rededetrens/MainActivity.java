@@ -30,6 +30,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import org.w3c.dom.Text;
 
 import java.io.*;
+import java.nio.Buffer;
 import java.text.NumberFormat;
 import java.util.*;
 
@@ -47,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private Spinner spnDe, spnPara;
     private RadioButton rbEscolha;
     private RadioGroup rbGroup;
+    private ListaSimples<Cidade> cidades;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -57,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             lista = new ArrayList<String>();
             caminhos = new ListaSimples<>();
+            cidades = new ListaSimples<>();
 
             tvResultado = findViewById(R.id.txtViewResultados);
             btnAdicionarCaminho = findViewById(R.id.btnCaminho);
@@ -71,22 +74,65 @@ public class MainActivity extends AppCompatActivity {
             grafoDistancia = new Grafo();
             grafoTempo = new Grafo();
 
-
             AssetManager ass = getAssets();
+            FileInputStream fis = null;
 
-            final ListaSimples<Cidade> cidades = new ListaSimples<>();
-            Scanner sc = new Scanner(ass.open("Cidades"));
-            lerCidades(sc, cidades);
-            inserirTabela(cidades);
-            sc.close();
+            try{
+                fis = openFileInput("Cidades");
 
-            sc = new Scanner(ass.open("GrafoTrem"));
-            lerGrafo(sc);
-            sc.close();
+                InputStreamReader isr = new InputStreamReader(fis);
+                BufferedReader br = new BufferedReader(isr);
+
+                lerCidades(br, cidades);
+                inserirTabela(cidades);
+            }
+            catch (FileNotFoundException e){
+                try {
+                    Scanner sc = new Scanner(ass.open("Cidades"));
+                    lerCidades(sc, cidades);
+                    inserirTabela(cidades);
+                    sc.close();
+                }
+                catch (Exception err)
+                {
+                    err.printStackTrace();
+                }
+            }
+            catch (IOException e){
+                e.printStackTrace();
+            }
+            finally {
+                if(fis != null)
+                    fis.close();
+            }
+
+            try{
+                fis = openFileInput("GrafoTrem");
+                InputStreamReader isr = new InputStreamReader(fis);
+                BufferedReader br = new BufferedReader(isr);
+                lerGrafo(br);
+            }
+            catch (FileNotFoundException e){
+                try {
+                    Scanner sc = new Scanner(ass.open("GrafoTrem"));
+                    lerGrafo(sc);
+                    sc.close();
+
+                }
+                catch (Exception err)
+                {
+                    err.printStackTrace();
+                }
+            }
+            catch (IOException e){
+                e.printStackTrace();
+            }
+            finally {
+                if(fis != null)
+                    fis.close();
+            }
 
             final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item, lista);
-
-
 
             spnDe.setAdapter(adapter);
             spnPara.setAdapter(adapter);
@@ -99,12 +145,6 @@ public class MainActivity extends AppCompatActivity {
                 desenharCidade(cidades.get(i), mBitnew);
 
             mBitmap = mBitnew;
-
-            InputStream assetIs = getAssets().open("Cidades");
-            copiaCidade = openFileOutput("Cidades", MODE_APPEND);
-
-            InputStream assetIs2 = getAssets().open("GrafoTrem");
-            copiaGrafo = openFileOutput("GrafoTrem", MODE_APPEND);
 
             btnBuscar.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -168,8 +208,8 @@ public class MainActivity extends AppCompatActivity {
                                         tabelaCidades.Insert(c);
                                         lista.add(c.getNome());
 
-                                        grafoTempo.NovoVertice(c.getNome());
-                                        grafoDistancia.NovoVertice(c.getNome());
+                                        grafoTempo.novoVertice(c.getNome());
+                                        grafoDistancia.novoVertice(c.getNome());
 
                                         Bitmap mBitnew = mBitmap.copy(mBitmap.getConfig(), true);
                                         desenharCidade(c, mBitnew);
@@ -177,14 +217,21 @@ public class MainActivity extends AppCompatActivity {
 
                                         mBitmap = mBitnew;
 
-                                        String id = String.format("%-2d", c.getId());
-                                        String cidadeNome = String.format("%-15s", c.getNome());
-                                        String coordX = String.format("&-6d", c.getX());
-                                        String coordY = String.format("&5d", c.getY());
+                                        cidades.inserirAposFim(c);
 
-                                        String linha = id + cidadeNome + coordX + coordY;
+                                        FileOutputStream fos = openFileOutput("Cidades", MODE_PRIVATE);
+                                        for(int i = 0; i < cidades.tamanho; i++) {
+                                            Cidade ci = tabelaCidades.getCidade(cidades.get(i).getNome());
 
-                                        copiaCidade.write(linha.getBytes());
+                                            String id = String.format("%-2d", ci.getId());
+                                            String cidadeNome = String.format("%-16s", ci.getNome());
+                                            String coordX = String.format("%.4f", ci.getX());
+                                            String coordY = String.format("%.3f", ci.getY());
+
+                                            String linha = id + cidadeNome + coordX + coordY + "\n";
+
+                                            fos.write(linha.getBytes());
+                                        }
 
                                         adapter.notifyDataSetChanged();
                                         Toast.makeText(getBaseContext(), "Cidade adicionada com sucesso", Toast.LENGTH_SHORT).show();
@@ -284,31 +331,36 @@ public class MainActivity extends AppCompatActivity {
                                     if (erro1 || erro2)
                                         Toast.makeText(getBaseContext(), "Cidades inexistentes", Toast.LENGTH_SHORT).show();
                                     else {
-                                        Caminho c = new Caminho(origem, destino, Integer.parseInt(distancia), Integer.parseInt(tempo));
-                                        caminhos.inserirAposFim(c);
-
-                                        String txtOrigem = String.format("%-15s", c.getOrigem());
-                                        String txtDestino= String.format("%-16s", c.getDestino());
-                                        String txtDistancia = String.format("&-5d", c.getDistancia());
-                                        String txtTempo = String.format("&3d", c.getTempo());
-
-                                        String linha = txtOrigem + txtDestino + txtDistancia + txtTempo;
-
-                                        int idOrigem  = tabelaCidades.getCidade(origem).getId();
-                                        int idDestino = tabelaCidades.getCidade(destino).getId();
-
-                                        grafoDistancia.NovaAresta(idOrigem, idDestino, Integer.parseInt(txtDistancia));
-                                        grafoTempo.NovaAresta(idOrigem, idDestino, Integer.parseInt(txtTempo));
-
                                         try {
-                                            copiaGrafo.write(linha.getBytes());
+                                            Caminho c = new Caminho(origem, destino, Integer.parseInt(distancia), Integer.parseInt(tempo));
+                                            caminhos.inserirAposFim(c);
+
+                                            FileOutputStream fos = openFileOutput("GrafoTrem", MODE_PRIVATE);
+                                            for(int i = 0; i < cidades.tamanho; i++) {
+                                                Caminho ca = caminhos.get(i);
+
+                                                String txtOrigem = String.format("%-16s", ca.getOrigem());
+                                                String txtDestino = String.format("%-16s", ca.getDestino());
+                                                String txtDistancia = String.format("%-5d", ca.getDistancia());
+                                                String txtTempo = String.format("%-3d", ca.getTempo());
+
+                                                String linha = txtOrigem + txtDestino + txtDistancia + txtTempo + "\n";
+                                                fos.write(linha.getBytes());
+                                            }
+
+                                            int idOrigem = tabelaCidades.getCidade(origem).getId();
+                                            int idDestino = tabelaCidades.getCidade(destino).getId();
+
+                                            grafoDistancia.novaAresta(idOrigem, idDestino, c.getDistancia());
+                                            grafoTempo.novaAresta(idOrigem, idDestino, c.getTempo());
+
+                                            Toast.makeText(getBaseContext(), "Caminho adicionado com sucesso", Toast.LENGTH_SHORT).show();
+                                            dialog.cancel();
                                         }
-                                        catch (IOException e) {
+                                        catch (Exception e)
+                                        {
                                             e.printStackTrace();
                                         }
-
-                                        Toast.makeText(getBaseContext(), "Caminho adicionado com sucesso", Toast.LENGTH_SHORT).show();
-                                        dialog.cancel();
                                     }
                                 }
                             }
@@ -384,10 +436,20 @@ public class MainActivity extends AppCompatActivity {
 
                 if (rbEscolha.getText().equals("Distancia")) {
                     try {
-                        String[] percurso = grafoDistancia.Caminho(idOrigem, idDestino);
-
+                        String[] percurso = grafoDistancia.caminho(idOrigem, idDestino);
+                        Bitmap mBitnew = mBitmap.copy(mBitmap.getConfig(), true);
                         if (percurso != null) {
-                            tvResultado.setText(percurso[0] + " " + percurso[1] + " " + percurso[2] + "km");
+                            tvResultado.setText(percurso[0]);
+                            for(int i = 1; i < percurso.length; i++) {
+                                if(percurso[i] == null)
+                                    break;
+                                if (isNumber(percurso[i])) {
+                                    tvResultado.setText(tvResultado.getText() + " distancia total = " + percurso[i] + "km");
+                                    break;
+                                }
+                                tvResultado.setText(tvResultado.getText() + " ---> " + percurso[i]);
+                                desenharPercurso(percurso[i-1],percurso[i], mBitnew);
+                            }
                         }
                         else
                             Toast.makeText(getBaseContext(), "Não existe existe caminhos entre essas cidades", Toast.LENGTH_SHORT).show();
@@ -399,11 +461,19 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else {
                     try {
-                        String[] percurso = grafoTempo.Caminho(idOrigem, idDestino);
+                        String[] percurso = grafoTempo.caminho(idOrigem, idDestino);
 
                         if (percurso != null) {
                             tvResultado.setText(percurso[0]);
-
+                            for(int i = 1; i < percurso.length; i++) {
+                                if(percurso[i] == null)
+                                    break;
+                                if (isNumber(percurso[i])) {
+                                    tvResultado.setText(tvResultado.getText() + " distancia total = " + percurso[i] + "km");
+                                    break;
+                                }
+                                tvResultado.setText(tvResultado.getText() + " ---> " + percurso[i]);
+                            }
                         }
                         else
                             Toast.makeText(getBaseContext(), "Não existe existe caminhos entre essas cidades", Toast.LENGTH_SHORT).show();
@@ -417,6 +487,28 @@ public class MainActivity extends AppCompatActivity {
             else
                 Toast.makeText(getBaseContext(), "Origem e Destino são iguais", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void desenharPercurso(String or, String des, Bitmap mBitnew) {
+        Canvas canvas = new Canvas(mBitnew);
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(Color.BLACK);
+        paint.setStyle(Paint.Style.FILL_AND_STROKE);
+
+        Float espessura = 4.0f;
+        paint.setStrokeWidth(espessura);
+
+        Cidade origem = tabelaCidades.getCidade(or);
+        Cidade destino = tabelaCidades.getCidade(des);
+
+        int startX = (int) (origem.getX() * 1890);
+        int startY = (int) (origem.getY() * 1520);
+
+        int finalX = (int) (destino.getX() * 1890);
+        int finalY = (int) (destino.getY() * 1520);
+
+        canvas.drawLine(startX, startY, finalX, finalY, paint);
+        ivImagem.setImageBitmap(mBitnew);
     }
 
     public void lerCidades(Scanner sc, ListaSimples<Cidade> cidades)
@@ -436,11 +528,46 @@ public class MainActivity extends AppCompatActivity {
             c.setY(Float.parseFloat(y[0] + "." + y[1]));
             cidades.inserirAposFim(c);
 
-            grafoDistancia.NovoVertice(c.getNome());
-            grafoTempo.NovoVertice(c.getNome());
+            grafoDistancia.novoVertice(c.getNome());
+            grafoTempo.novoVertice(c.getNome());
             lista.add(c.getNome());
         }
 
+    }
+
+    public void lerCidades(BufferedReader br, ListaSimples<Cidade> cidades)
+    {
+        String s = "";
+        try {
+            for (int i = 0; (s = br.readLine()) != null; i++) {
+                Cidade c = new Cidade();
+                c.setId(Integer.parseInt(s.substring(0, 2).trim()));
+                c.setNome(s.substring(2, 18).trim());
+
+                if(isFloat(s.substring(18, 24).trim()))
+                    c.setX(Float.parseFloat(s.substring(18, 24).trim()));
+                else {
+                    String[] x = s.substring(18, 24).trim().split(",");
+                    c.setX(Float.parseFloat(x[0] + "." + x[1]));
+                }
+
+                if(isFloat(s.substring(24, 29).trim()))
+                    c.setY(Float.parseFloat(s.substring(24, 29).trim()));
+                else {
+                        String[] y = s.substring(24, 29).trim().split(",");
+                        c.setY(Float.parseFloat(y[0] + "." + y[1]));
+                }
+                cidades.inserirAposFim(c);
+
+                grafoDistancia.novoVertice(c.getNome());
+                grafoTempo.novoVertice(c.getNome());
+                lista.add(c.getNome());
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     public void lerGrafo(Scanner sc)
@@ -454,18 +581,45 @@ public class MainActivity extends AppCompatActivity {
             c.setOrigem(s.substring(0,15).trim());
             c.setDestino(s.substring(15, 30).trim());
             c.setDistancia(Integer.parseInt(s.substring(30, 35).trim()));
-            c.setTempo(Integer.parseInt(s.substring(35, 38).trim()));
+            c.setTempo(Integer.parseInt(s.substring(35, 39).trim()));
 
             int idOrigem  = tabelaCidades.getCidade(c.getOrigem().trim()).getId();
             int idDestino = tabelaCidades.getCidade(c.getDestino().trim()).getId();
 
-            grafoDistancia.NovaAresta(idOrigem, idDestino, c.getDistancia());
-            grafoDistancia.NovaAresta(idOrigem, idDestino, c.getDistancia());
+            grafoDistancia.novaAresta(idOrigem, idDestino, c.getDistancia());
+            grafoDistancia.novaAresta(idOrigem, idDestino, c.getDistancia());
 
             caminhos.inserirAposFim(c);
         }
         sc.close();
     }
+
+    public void lerGrafo(BufferedReader br)
+    {
+        String s = "";
+        try {
+            for (int i = 0; (s = br.readLine()) != null; i++) {
+                Caminho c = new Caminho();
+                c.setOrigem(s.substring(0, 15).trim());
+                c.setDestino(s.substring(15, 30).trim());
+                c.setDistancia(Integer.parseInt(s.substring(30, 35).trim()));
+                c.setTempo(Integer.parseInt(s.substring(35, 40).trim()));
+
+                int idOrigem = tabelaCidades.getCidade(c.getOrigem().trim()).getId();
+                int idDestino = tabelaCidades.getCidade(c.getDestino().trim()).getId();
+
+                grafoDistancia.novaAresta(idOrigem, idDestino, c.getDistancia());
+                grafoDistancia.novaAresta(idOrigem, idDestino, c.getDistancia());
+
+                caminhos.inserirAposFim(c);
+            }
+            br.close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public boolean isNumber(String n)
     {
